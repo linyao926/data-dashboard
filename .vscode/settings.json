@@ -1,0 +1,40 @@
+{
+  // Prettier as default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  
+  // Format on save 
+  "editor.formatOnSave": true,
+  
+  // Format on paste
+  "editor.formatOnPaste": true,
+  
+  // ESLint auto-fix on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  // Tailwind CSS IntelliSense
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  
+  // CSS validation 
+  "css.lint.unknownAtRules": "ignore",
+  
+  // TypeScript suggestions
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  
+  // File associations
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  
+  // Exclude from search
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  }
+}
