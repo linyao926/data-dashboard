@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+import { Card, Button, Badge, Input } from '@/components/common';
 
 export interface FilterState {
   searchQuery: string;
@@ -23,7 +24,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
     dateTo: '',
   });
 
-  // Count active filters (excluding 'All' category and empty values)
+  // Count active filters
   const activeFilterCount = [
     filters.searchQuery,
     filters.category !== 'All' ? filters.category : '',
@@ -49,91 +50,73 @@ const FilterBar: React.FC<FilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <Card variant="default" padding="md" className="mb-6">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-            Search
-          </label>
-          <div className="relative">
-            <input
-              id="search"
-              type="text"
-              placeholder="Search products, categories, customers..."
-              value={filters.searchQuery}
-              onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
-          </div>
+          <Input
+            label="Search"
+            type="text"
+            placeholder="Search products, categories, customers..."
+            value={filters.searchQuery}
+            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+            leftIcon={<span className="text-gray-400">🔍</span>}
+            fullWidth
+          />
         </div>
 
         {/* Category Dropdown */}
         <div className="w-full lg:w-48">
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
-          <select
-            id="category"
+          <Input.Select
+            label="Category"
             value={filters.category}
             onChange={(e) => handleFilterChange('category', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+            options={categories.map((cat) => ({ value: cat, label: cat }))}
+            fullWidth
+          />
         </div>
 
         {/* Date From */}
         <div className="w-full lg:w-44">
-          <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-1">
-            From Date
-          </label>
-          <input
-            id="dateFrom"
+          <Input
+            label="From Date"
             type="date"
             value={filters.dateFrom}
             onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            fullWidth
           />
         </div>
 
         {/* Date To */}
         <div className="w-full lg:w-44">
-          <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-1">
-            To Date
-          </label>
-          <input
-            id="dateTo"
+          <Input
+            label="To Date"
             type="date"
             value={filters.dateTo}
             onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            fullWidth
           />
         </div>
 
         {/* Clear Filters Button */}
         <div className="flex items-end">
-          <button
+          <Button
+            variant="secondary"
+            size="md"
             onClick={handleClearFilters}
             disabled={activeFilterCount === 0}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+            leftIcon={<span>✖️</span>}
+            rightIcon={
+              activeFilterCount > 0 ? (
+                <Badge.Count count={activeFilterCount} variant="primary" />
+              ) : undefined
+            }
           >
-            <span>✖️</span>
             Clear
-            {activeFilterCount > 0 && (
-              <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

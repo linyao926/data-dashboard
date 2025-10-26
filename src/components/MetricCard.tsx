@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card, Badge } from '@/components/common';
 
 interface MetricCardProps {
   title: string;
@@ -27,23 +28,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
     orange: 'from-orange-500 to-orange-600',
   };
 
-  // Trend badge colors
-  const trendColorMap = {
-    up: 'bg-green-100 text-green-700',
-    down: 'bg-red-100 text-red-700',
-  };
-
-  // Trend icons
-  const trendIcon = trend === 'up' ? '↑' : '↓';
-
   // Format value with commas if it's a number
   const formattedValue = typeof value === 'number' ? value.toLocaleString('en-US') : value;
 
-  // Format change percentage
-  const formattedChange = `${trend === 'up' ? '+' : '-'}${Math.abs(change)}%`;
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+    <Card variant="default" padding="md" hoverable>
       {/* Header: Icon + Badge */}
       <div className="flex items-center justify-between mb-4">
         <div
@@ -51,28 +40,31 @@ const MetricCard: React.FC<MetricCardProps> = ({
         >
           {icon}
         </div>
-        <span
-          className={`text-xs font-medium px-2.5 py-1 rounded-full ${trendColorMap[trend]} flex items-center gap-1`}
+        <Badge
+          variant={trend === 'up' ? 'success' : 'danger'}
+          size="sm"
+          rounded
+          icon={trend === 'up' ? '↑' : '↓'}
         >
-          {trendIcon} {formattedChange}
-        </span>
+          {Math.abs(change)}%
+        </Badge>
       </div>
 
       {/* Content */}
-      <div>
+      <Card.Content>
         <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
         <p className="text-2xl font-bold text-gray-900 mb-1">{formattedValue}</p>
         <p className="text-xs text-gray-500">{subtitle}</p>
-      </div>
+      </Card.Content>
 
-      {/* Progress bar (optional visual indicator) */}
+      {/* Progress bar */}
       <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
         <div
           className={`h-full bg-gradient-to-r ${colorMap[color]} transition-all duration-1000 ease-out`}
           style={{ width: `${Math.min(Math.abs(change) * 5, 100)}%` }}
         />
       </div>
-    </div>
+    </Card>
   );
 };
 

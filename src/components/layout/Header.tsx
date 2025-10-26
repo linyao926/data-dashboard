@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button, Badge, Input } from '@/components/common';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -46,18 +47,16 @@ const Header: React.FC<HeaderProps> = ({
           {/* Navigation Links - Hidden on mobile */}
           <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
-              <button
+              <Button
                 key={item.id}
+                variant={activeNav === item.id ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => setActiveNav(item.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeNav === item.id
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                leftIcon={<span>{item.icon}</span>}
+                className={activeNav === item.id ? 'bg-blue-50 text-blue-600' : ''}
               >
-                <span className="mr-2">{item.icon}</span>
                 {item.label}
-              </button>
+              </Button>
             ))}
           </nav>
 
@@ -65,42 +64,47 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-4">
             {/* Search Bar - Hidden on mobile */}
             <div className="hidden lg:flex items-center">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  className="w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-                <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
-              </div>
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearch}
+                leftIcon={<span className="text-gray-400">🔍</span>}
+                className="w-64 bg-gray-50"
+              />
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-              <span className="text-xl">🔔</span>
+            <div className="relative">
+              <Button variant="ghost" size="sm">
+                <span className="text-xl">🔔</span>
+              </Button>
               {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {notificationCount}
-                </span>
+                <div className="absolute -top-1 -right-1">
+                  <Badge.Count count={notificationCount} variant="danger" />
+                </div>
               )}
-            </button>
+            </div>
 
             {/* User Menu */}
             <div className="relative">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                leftIcon={
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                }
+                rightIcon={
+                  <span className="text-gray-400 text-xs">{isUserMenuOpen ? '▲' : '▼'}</span>
+                }
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
                 <span className="hidden sm:block text-sm font-medium text-gray-700">
                   {userName}
                 </span>
-                <span className="text-gray-400 text-xs">{isUserMenuOpen ? '▲' : '▼'}</span>
-              </button>
+              </Button>
 
               {/* Dropdown Menu */}
               {isUserMenuOpen && (

@@ -10,6 +10,7 @@ import {
   Area,
   AreaChart,
 } from 'recharts';
+import { Card, Button, Badge } from '@/components/common';
 
 // Props interface
 interface RevenueChartProps {
@@ -61,14 +62,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white px-4 py-3 rounded-lg shadow-lg border border-gray-200">
+        <Card padding="sm">
           <p className="text-sm font-semibold text-gray-900">
             {payload[0].payload.label || payload[0].payload.date}
           </p>
           <p className="text-lg font-bold text-blue-600">
             ${payload[0].value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </p>
-        </div>
+        </Card>
       );
     }
     return null;
@@ -83,106 +84,101 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-300 hover:shadow-md">
+    <Card variant="default" padding="md" hoverable>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <Card.Header className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
-          <p className="text-sm text-gray-500 mt-1">Track your revenue trends over time</p>
+          <Card.Title>Revenue Overview</Card.Title>
+          <Card.Description>Track your revenue trends over time</Card.Description>
         </div>
 
         {/* Time Range Toggle */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
           {timeRanges.map((range) => (
-            <button
+            <Button
               key={range.id}
+              variant={activeRange === range.id ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => handleRangeChange(range.id)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeRange === range.id
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+              className={activeRange === range.id ? 'bg-white shadow-sm' : ''}
             >
               {range.label}
-            </button>
+            </Button>
           ))}
         </div>
-      </div>
+      </Card.Header>
 
       {/* Chart */}
-      <div className="w-full h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+      <Card.Content>
+        <div className="w-full h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
 
-            {/* Grid */}
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
 
-            {/* X Axis */}
-            <XAxis
-              dataKey="date"
-              stroke="#6B7280"
-              style={{ fontSize: '12px' }}
-              tickLine={false}
-              axisLine={false}
-            />
+              <XAxis
+                dataKey="date"
+                stroke="#6B7280"
+                style={{ fontSize: '12px' }}
+                tickLine={false}
+                axisLine={false}
+              />
 
-            {/* Y Axis */}
-            <YAxis
-              stroke="#6B7280"
-              style={{ fontSize: '12px' }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={formatYAxis}
-            />
+              <YAxis
+                stroke="#6B7280"
+                style={{ fontSize: '12px' }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={formatYAxis}
+              />
 
-            {/* Tooltip */}
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3B82F6', strokeWidth: 1 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3B82F6', strokeWidth: 1 }} />
 
-            {/* Area */}
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#3B82F6"
-              strokeWidth={3}
-              fill="url(#colorRevenue)"
-              activeDot={{ r: 6, fill: '#3B82F6' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Highest</p>
-          <p className="text-lg font-bold text-gray-900 mt-1">
-            ${Math.max(...chartData.map((d) => d.revenue)).toLocaleString('en-US')}
-          </p>
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#3B82F6"
+                strokeWidth={3}
+                fill="url(#colorRevenue)"
+                activeDot={{ r: 6, fill: '#3B82F6' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Average</p>
-          <p className="text-lg font-bold text-gray-900 mt-1">
-            $
-            {(chartData.reduce((sum, d) => sum + d.revenue, 0) / chartData.length).toLocaleString(
-              'en-US',
-              { maximumFractionDigits: 0 }
-            )}
-          </p>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Highest</p>
+            <p className="text-lg font-bold text-gray-900 mt-1">
+              ${Math.max(...chartData.map((d) => d.revenue)).toLocaleString('en-US')}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Average</p>
+            <p className="text-lg font-bold text-gray-900 mt-1">
+              $
+              {(chartData.reduce((sum, d) => sum + d.revenue, 0) / chartData.length).toLocaleString(
+                'en-US',
+                { maximumFractionDigits: 0 }
+              )}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Total</p>
+            <p className="text-lg font-bold text-gray-900 mt-1">
+              ${chartData.reduce((sum, d) => sum + d.revenue, 0).toLocaleString('en-US')}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Total</p>
-          <p className="text-lg font-bold text-gray-900 mt-1">
-            ${chartData.reduce((sum, d) => sum + d.revenue, 0).toLocaleString('en-US')}
-          </p>
-        </div>
-      </div>
-    </div>
+      </Card.Content>
+    </Card>
   );
 };
 

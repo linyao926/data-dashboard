@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Card, Badge, Button, Input } from '@/components/common';
 
 // Types
 interface SaleRecord {
@@ -77,7 +78,7 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
   // Handle rows per page change
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   // Column definitions
@@ -128,34 +129,35 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <Card variant="default" padding="none">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <Card.Header className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Sales Records</h2>
-            <p className="text-sm text-gray-500 mt-1">{sortedData.length} total transactions</p>
+            <Card.Title>Sales Records</Card.Title>
+            <Card.Description>{sortedData.length} total transactions</Card.Description>
           </div>
 
           {/* Rows per page */}
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Show:</label>
-            <select
+            <Input.Select
               value={rowsPerPage}
               onChange={handleRowsPerPageChange}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
+              options={[
+                { value: '10', label: '10' },
+                { value: '25', label: '25' },
+                { value: '50', label: '50' },
+                { value: '100', label: '100' },
+              ]}
+              className="w-20"
+            />
           </div>
         </div>
-      </div>
+      </Card.Header>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <Card.Content className="overflow-x-auto p-0">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -208,9 +210,9 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
                         {col.field === 'product' ? (
                           <div className="font-medium text-gray-900">{displayValue}</div>
                         ) : col.field === 'category' ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <Badge variant="primary" size="sm">
                             {displayValue}
-                          </span>
+                          </Badge>
                         ) : (
                           <span className="text-gray-600">{displayValue}</span>
                         )}
@@ -222,24 +224,25 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
             )}
           </tbody>
         </table>
-      </div>
+      </Card.Content>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <Card.Footer className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
             Showing {(currentPage - 1) * rowsPerPage + 1} to{' '}
             {Math.min(currentPage * rowsPerPage, sortedData.length)} of {sortedData.length} results
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
-            </button>
+            </Button>
 
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -255,35 +258,30 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
                 }
 
                 return (
-                  <button
+                  <Button
                     key={pageNum}
+                    variant={currentPage === pageNum ? 'primary' : 'outline'}
+                    size="sm"
                     onClick={() => handlePageChange(pageNum)}
-                    className={`
-                      px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${
-                        currentPage === pageNum
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }
-                    `}
                   >
                     {pageNum}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card.Footer>
       )}
-    </div>
+    </Card>
   );
 };
 
