@@ -120,4 +120,4 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
   );
 };
 
-export default CategoryPieChart;
+export default React.memo(CategoryPieChart);

@@ -68,4 +68,4 @@ const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
-export default MetricCard;
+export default React.memo(MetricCard);

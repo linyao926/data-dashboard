@@ -22,7 +22,6 @@ interface DataTableProps {
   onRowClick?: (record: SaleRecord) => void;
 }
 
-// Component
 const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) => {
   // State
   const [sortField, setSortField] = useState<SortField>('date');
@@ -285,4 +284,4 @@ const DataTable: React.FC<DataTableProps> = ({ data = [], onSort, onRowClick }) 
   );
 };
 
-export default DataTable;
+export default React.memo(DataTable);

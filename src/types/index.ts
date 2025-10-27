@@ -1,14 +1,16 @@
 export interface SaleRecord {
   id: string;
-  date: string;
   product: string;
   category: string;
+  date: string;
   quantity: number;
   price: number;
-  revenue: number;
-  region: string;
-  paymentMethod: string;
-}
+  amount: number;
+  customer: string;
+  revenue?: number;
+  region?: string;
+  paymentMethod?: string;
+};
 
 export interface MetricData {
   label: string;

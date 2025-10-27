@@ -21,7 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       <footer className="mt-auto bg-white border-t border-gray-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-          © 2025 Sales Dashboard. Built with React + TypeScript + Tailwind CSS
+          © 2025 linyao926
         </div>
       </footer>
     </div>

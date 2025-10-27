@@ -10,13 +10,12 @@ import {
   Area,
   AreaChart,
 } from 'recharts';
-import { Card, Button, Badge } from '@/components/common';
+import { Card, Button } from '@/components/common';
 
-// Props interface
 interface RevenueChartProps {
   data?: ChartDataPoint[];
-  timeRange?: 'week' | 'month' | 'year';
-  onTimeRangeChange?: (range: 'week' | 'month' | 'year') => void;
+  timeRange?: 'week' | 'month' | 'quarter';
+  onTimeRangeChange?: (range: 'week' | 'month' | 'quarter') => void;
 }
 
 interface ChartDataPoint {
@@ -30,9 +29,8 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   timeRange = 'week',
   onTimeRangeChange,
 }) => {
-  const [activeRange, setActiveRange] = useState<'week' | 'month' | 'year'>(timeRange);
+  const [activeRange, setActiveRange] = useState<'week' | 'month' | 'quarter'>(timeRange);
 
-  // Sample data if none provided
   const sampleData: ChartDataPoint[] = [
     { date: 'Mon', revenue: 4500, label: 'Monday' },
     { date: 'Tue', revenue: 5200, label: 'Tuesday' },
@@ -45,20 +43,17 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
 
   const chartData = data.length > 0 ? data : sampleData;
 
-  // Handle time range change
-  const handleRangeChange = (range: 'week' | 'month' | 'year') => {
+  const handleRangeChange = (range: 'week' | 'month' | 'quarter') => {
     setActiveRange(range);
     onTimeRangeChange?.(range);
   };
 
-  // Time range buttons
-  const timeRanges: Array<{ id: 'week' | 'month' | 'year'; label: string }> = [
+  const timeRanges: Array<{ id: 'week' | 'month' | 'quarter'; label: string }> = [
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },
-    { id: 'year', label: 'Year' },
+    { id: 'quarter', label: 'Quarter' },
   ];
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -75,7 +70,6 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     return null;
   };
 
-  // Format Y-axis ticks
   const formatYAxis = (value: number) => {
     if (value >= 1000) {
       return `$${(value / 1000).toFixed(1)}k`;
@@ -85,7 +79,6 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
 
   return (
     <Card variant="default" padding="md" hoverable>
-      {/* Header */}
       <Card.Header className="flex items-center justify-between mb-6">
         <div>
           <Card.Title>Revenue Overview</Card.Title>
@@ -108,7 +101,6 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
         </div>
       </Card.Header>
 
-      {/* Chart */}
       <Card.Content>
         <div className="w-full h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -182,4 +174,4 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   );
 };
 
-export default RevenueChart;
+export default React.memo(RevenueChart);
