@@ -1,26 +1,23 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useTransition,
-  lazy,
-  Suspense,
-} from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useTransition, lazy, Suspense } from 'react';
+import { DollarSign, ShoppingCart, TrendingUp, Users, Calendar, Download } from 'lucide-react';
 import { fetchSalesData, getCategories, cancelFetch } from '../services/api';
 import type { SaleRecord } from '../types';
 import { useDebounce } from '../hooks/useDebounce';
 import { groupByWeek, groupByMonth, groupByQuarter } from '../utils/chartUtils';
+import { useTheme } from '../contexts/ThemeContext';
 import MetricCard from '../components/MetricCard';
 import DataTable from '../components/DataTable';
 import FilterBar from '../components/FilterBar';
+import RecentSales from '../components/RecentSales';
+import TopProducts from '../components/TopProducts';
 import type { FilterState } from '../components/FilterBar';
 
-// Lazy load charts for better LCP
 const RevenueChart = lazy(() => import('../components/RevenueChart'));
 const CategoryPieChart = lazy(() => import('../components/CategoryPieChart'));
 
 const Dashboard: React.FC = () => {
+  const { theme } = useTheme();
+  
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
     category: 'All',
@@ -32,10 +29,7 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(['All']);
-
-  // Change year to quarter
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('week');
-
   const [loadingStage, setLoadingStage] = useState<string>('Initializing...');
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
@@ -60,7 +54,7 @@ const Dashboard: React.FC = () => {
         const cats = getCategories(data);
         setCategories(cats);
 
-        console.log(`Loaded ${data.length} sales records`);
+        console.log(`✅ Loaded ${data.length} sales records`);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
         console.error('❌ Error loading data:', err);
@@ -77,7 +71,6 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleTimeRangeChange = useCallback((range: 'week' | 'month' | 'quarter') => {
-    console.log('Time range changed:', range);
     setTimeRange(range);
   }, []);
 
@@ -127,50 +120,49 @@ const Dashboard: React.FC = () => {
     });
   }, [salesData, debouncedSearchQuery, filters.category, filters.dateFrom, filters.dateTo]);
 
-  // FIX: Calculate real trends (compare with previous period)
+  // ✅ Helper function for trend direction
+  const getTrend = (change: number): 'up' | 'down' => (change >= 0 ? 'up' : 'down');
+
   const metricsData = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    // Current period (last 30 days)
-    const currentPeriod = filteredSalesData.filter((r) => {
+    const currentPeriod = filteredSalesData.filter(r => {
       const date = new Date(r.date);
       return date >= thirtyDaysAgo && date <= now;
     });
 
-    // Previous period (30-60 days ago)
-    const previousPeriod = filteredSalesData.filter((r) => {
+    const previousPeriod = filteredSalesData.filter(r => {
       const date = new Date(r.date);
       return date >= sixtyDaysAgo && date < thirtyDaysAgo;
     });
 
-    // Calculate metrics
     const currentRevenue = currentPeriod.reduce((sum, r) => sum + r.amount, 0);
     const previousRevenue = previousPeriod.reduce((sum, r) => sum + r.amount, 0);
-    const revenueChange =
-      previousRevenue > 0 ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+    const revenueChange = previousRevenue > 0 
+      ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 
+      : 0;
 
     const currentOrders = currentPeriod.length;
     const previousOrders = previousPeriod.length;
-    const ordersChange =
-      previousOrders > 0 ? ((currentOrders - previousOrders) / previousOrders) * 100 : 0;
+    const ordersChange = previousOrders > 0
+      ? ((currentOrders - previousOrders) / previousOrders) * 100
+      : 0;
 
     const currentAvgOrder = currentOrders > 0 ? currentRevenue / currentOrders : 0;
-    const previousAvgOrder =
-      previousOrders > 0
-        ? previousPeriod.reduce((sum, r) => sum + r.amount, 0) / previousOrders
-        : 0;
-    const avgOrderChange =
-      previousAvgOrder > 0 ? ((currentAvgOrder - previousAvgOrder) / previousAvgOrder) * 100 : 0;
+    const previousAvgOrder = previousOrders > 0 
+      ? previousPeriod.reduce((sum, r) => sum + r.amount, 0) / previousOrders 
+      : 0;
+    const avgOrderChange = previousAvgOrder > 0
+      ? ((currentAvgOrder - previousAvgOrder) / previousAvgOrder) * 100
+      : 0;
 
-    const currentCustomers = new Set(currentPeriod.map((r) => r.customer).filter(Boolean)).size;
-    const previousCustomers = new Set(previousPeriod.map((r) => r.customer).filter(Boolean)).size;
-    const customersChange =
-      previousCustomers > 0
-        ? ((currentCustomers - previousCustomers) / previousCustomers) * 100
-        : 0;
-    const getTrend = (change: number): 'up' | 'down' => (change >= 0 ? 'up' : 'down');
+    const currentCustomers = new Set(currentPeriod.map(r => r.customer).filter(Boolean)).size;
+    const previousCustomers = new Set(previousPeriod.map(r => r.customer).filter(Boolean)).size;
+    const customersChange = previousCustomers > 0
+      ? ((currentCustomers - previousCustomers) / previousCustomers) * 100
+      : 0;
 
     return [
       {
@@ -180,7 +172,7 @@ const Dashboard: React.FC = () => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}`,
-        icon: '💰',
+        icon: DollarSign,
         trend: getTrend(revenueChange),
         change: Math.abs(revenueChange),
         color: 'blue' as const,
@@ -190,7 +182,7 @@ const Dashboard: React.FC = () => {
         id: 'orders',
         title: 'Total Orders',
         value: currentOrders.toLocaleString('en-US'),
-        icon: '🛒',
+        icon: ShoppingCart,
         trend: getTrend(ordersChange),
         change: Math.abs(ordersChange),
         color: 'green' as const,
@@ -203,7 +195,7 @@ const Dashboard: React.FC = () => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}`,
-        icon: '📊',
+        icon: TrendingUp,
         trend: getTrend(avgOrderChange),
         change: Math.abs(avgOrderChange),
         color: 'purple' as const,
@@ -213,7 +205,7 @@ const Dashboard: React.FC = () => {
         id: 'customers',
         title: 'Total Customers',
         value: currentCustomers.toLocaleString('en-US'),
-        icon: '👥',
+        icon: Users,
         trend: getTrend(customersChange),
         change: Math.abs(customersChange),
         color: 'orange' as const,
@@ -270,15 +262,15 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center max-w-md">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-lg font-semibold text-gray-700 mb-2">{loadingStage}</p>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <p className={`text-lg font-semibold ${theme.text.primary} mb-2`}>{loadingStage}</p>
+            <div className={`w-full ${theme.bg.tertiary} rounded-full h-3 overflow-hidden`}>
               <div
                 className="bg-blue-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${loadingProgress}%` }}
               />
             </div>
             {loadingProgress > 0 && (
-              <p className="text-sm text-gray-500 mt-2">{loadingProgress}% complete</p>
+              <p className={`text-sm ${theme.text.tertiary} mt-2`}>{loadingProgress}% complete</p>
             )}
           </div>
         </div>
@@ -311,23 +303,27 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Page Header */}
           <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Sales Dashboard</h1>
-              <p className="text-gray-600 mt-1">Track your sales performance and analytics</p>
+              <h1 className={`text-3xl font-bold ${theme.text.primary}`}>Sales Dashboard</h1>
+              <p className={`${theme.text.secondary} mt-1`}>Track your sales performance and analytics</p>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                📅 Last 30 Days
+              <button className={`flex items-center gap-2 px-4 py-2 border ${theme.border.primary} rounded-lg ${theme.hover.bg} transition-colors`}>
+                <Calendar size={16} />
+                Last 30 Days
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                📥 Export
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Download size={16} />
+                Export
               </button>
             </div>
           </section>
 
+          {/* Metrics Grid */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Metrics</h2>
+            <h2 className={`text-xl font-semibold ${theme.text.primary} mb-4`}>Key Metrics</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {metricsData.map((metric) => (
                 <MetricCard key={metric.id} {...metric} />
@@ -335,11 +331,12 @@ const Dashboard: React.FC = () => {
             </div>
           </section>
 
+          {/* Charts Section */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Analytics</h2>
+            <h2 className={`text-xl font-semibold ${theme.text.primary} mb-6`}>Analytics</h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <Suspense fallback={<ChartSkeleton />}>
+                <Suspense fallback={<ChartSkeleton theme={theme} />}>
                   <RevenueChart
                     data={revenueChartData}
                     timeRange={timeRange}
@@ -348,17 +345,29 @@ const Dashboard: React.FC = () => {
                 </Suspense>
               </div>
               <div className="lg:col-span-1">
-                <Suspense fallback={<ChartSkeleton />}>
+                <Suspense fallback={<ChartSkeleton theme={theme} />}>
                   <CategoryPieChart data={categoryData} />
                 </Suspense>
               </div>
             </div>
           </section>
 
+          {/* Sales Data Section */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Sales Data</h2>
-            <FilterBar onFilterChange={handleFilterChange} categories={categories} />
-            <DataTable data={filteredSalesData} onSort={handleSort} onRowClick={handleRowClick} />
+            <h2 className={`text-xl font-semibold ${theme.text.primary} mb-6`}>Sales Data</h2>
+            <p className={`text-sm ${theme.text.tertiary} mb-4`}>Filter and search sales records</p>
+            <div className="space-y-4">
+              <FilterBar onFilterChange={handleFilterChange} categories={categories} />
+              <DataTable data={filteredSalesData} onSort={handleSort} onRowClick={handleRowClick} />
+            </div>
+          </section>
+
+          {/* Recent Sales & Top Products */}
+          <section>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RecentSales data={filteredSalesData} limit={5} />
+              <TopProducts data={filteredSalesData} limit={5} />
+            </div>
           </section>
         </div>
       )}
@@ -366,10 +375,10 @@ const Dashboard: React.FC = () => {
   );
 };
 
-const ChartSkeleton = () => (
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-96 animate-pulse">
-    <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-    <div className="h-full bg-gray-100 rounded"></div>
+const ChartSkeleton = ({ theme }: { theme: any }) => (
+  <div className={`${theme.bg.card} rounded-lg shadow-sm border ${theme.border.primary} p-6 h-96 animate-pulse`}>
+    <div className={`h-4 ${theme.bg.tertiary} rounded w-1/3 mb-4`}></div>
+    <div className={`h-full ${theme.bg.secondary} rounded`}></div>
   </div>
 );
 

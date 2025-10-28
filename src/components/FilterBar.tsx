@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Card, Button, Badge, Input } from '@/components/common';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export interface FilterState {
   searchQuery: string;
@@ -24,7 +28,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
     dateTo: '',
   });
 
-  // Count active filters
+  // Date states for Calendar
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
+
   const activeFilterCount = [
     filters.searchQuery,
     filters.category !== 'All' ? filters.category : '',
@@ -38,6 +45,19 @@ const FilterBar: React.FC<FilterBarProps> = ({
     onFilterChange?.(newFilters);
   };
 
+  // Handle date from calendar
+  const handleDateFromChange = (date: Date | undefined) => {
+    setDateFrom(date);
+    const dateString = date ? format(date, 'yyyy-MM-dd') : '';
+    handleFilterChange('dateFrom', dateString);
+  };
+
+  const handleDateToChange = (date: Date | undefined) => {
+    setDateTo(date);
+    const dateString = date ? format(date, 'yyyy-MM-dd') : '';
+    handleFilterChange('dateTo', dateString);
+  };
+
   const handleClearFilters = () => {
     const clearedFilters: FilterState = {
       searchQuery: '',
@@ -46,6 +66,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
       dateTo: '',
     };
     setFilters(clearedFilters);
+    setDateFrom(undefined);
+    setDateTo(undefined);
     onFilterChange?.(clearedFilters);
   };
 
@@ -76,26 +98,47 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
         </div>
 
-        {/* Date From */}
+        {/* Date From - Calendar Popover */}
         <div className="w-full lg:w-44">
-          <Input
-            label="From Date"
-            type="date"
-            value={filters.dateFrom}
-            onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-            fullWidth
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateFrom ? format(dateFrom, 'MMM dd, yyyy') : 'Pick a date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFrom}
+                onSelect={handleDateFromChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
-        {/* Date To */}
+        {/* Date To - Calendar Popover */}
         <div className="w-full lg:w-44">
-          <Input
-            label="To Date"
-            type="date"
-            value={filters.dateTo}
-            onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-            fullWidth
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateTo ? format(dateTo, 'MMM dd, yyyy') : 'Pick a date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateTo}
+                onSelect={handleDateToChange}
+                initialFocus
+                disabled={(date) => (dateFrom ? date < dateFrom : false)}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Clear Filters Button */}
@@ -120,4 +163,4 @@ const FilterBar: React.FC<FilterBarProps> = ({
   );
 };
 
-export default React.memo(FilterBar);
+export default FilterBar;

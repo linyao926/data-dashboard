@@ -11,22 +11,21 @@ export default defineConfig({
     },
   },
 
-  // ✅ OPTIMIZE 1: Web Worker config
   worker: {
     format: 'es',
   },
 
-  // ✅ OPTIMIZE 2: Build optimizations
+
   build: {
-    // Split chunks for better caching
+ 
     rollupOptions: {
       output: {
         manualChunks: {
-          // Separate vendor chunks
+
           'react-vendor': ['react', 'react-dom'],
           'recharts-vendor': ['recharts'],
 
-          // Common components
+
           'common-components': [
             './src/components/common/Button',
             './src/components/common/Card',
@@ -39,7 +38,7 @@ export default defineConfig({
       },
     },
 
-    // ✅ Compress output
+    // Compress output
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -48,14 +47,13 @@ export default defineConfig({
       },
     },
 
-    // ✅ Chunk size warnings
-    chunkSizeWarningLimit: 500, // Warn if chunk > 500KB
+    chunkSizeWarningLimit: 500,
   },
 
-  // ✅ OPTIMIZE 3: Server optimizations
+
   server: {
     port: 5173,
-    // Enable compression
+
     headers: {
       'Cache-Control': 'public, max-age=31536000',
     },

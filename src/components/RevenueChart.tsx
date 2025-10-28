@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Area,
-  AreaChart,
 } from 'recharts';
-import { Card, Button } from '@/components/common';
+import { Card } from '@/components/common';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RevenueChartProps {
   data?: ChartDataPoint[];
@@ -43,16 +42,11 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
 
   const chartData = data.length > 0 ? data : sampleData;
 
-  const handleRangeChange = (range: 'week' | 'month' | 'quarter') => {
-    setActiveRange(range);
-    onTimeRangeChange?.(range);
+  const handleRangeChange = (range: string) => {
+    const newRange = range as 'week' | 'month' | 'quarter';
+    setActiveRange(newRange);
+    onTimeRangeChange?.(newRange);
   };
-
-  const timeRanges: Array<{ id: 'week' | 'month' | 'quarter'; label: string }> = [
-    { id: 'week', label: 'Week' },
-    { id: 'month', label: 'Month' },
-    { id: 'quarter', label: 'Quarter' },
-  ];
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -85,20 +79,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
           <Card.Description>Track your revenue trends over time</Card.Description>
         </div>
 
-        {/* Time Range Toggle */}
-        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-          {timeRanges.map((range) => (
-            <Button
-              key={range.id}
-              variant={activeRange === range.id ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => handleRangeChange(range.id)}
-              className={activeRange === range.id ? 'bg-white shadow-sm' : ''}
-            >
-              {range.label}
-            </Button>
-          ))}
-        </div>
+        {/* ✅ shadcn Tabs (thay buttons) */}
+        <Tabs value={activeRange} onValueChange={handleRangeChange}>
+          <TabsList>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="month">Month</TabsTrigger>
+            <TabsTrigger value="quarter">Quarter</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </Card.Header>
 
       <Card.Content>

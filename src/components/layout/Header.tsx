@@ -1,5 +1,30 @@
 import React, { useState } from 'react';
+import {
+  Bell,
+  User,
+  ChevronDown,
+  BarChart3,
+  Home,
+  FileText,
+  Settings as SettingsIcon,
+  LogOut,
+  Menu,
+  X,
+  Search,
+  Moon,
+  Sun,
+} from 'lucide-react';
 import { Button, Badge, Input } from '@/components/common';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -12,8 +37,8 @@ const Header: React.FC<HeaderProps> = ({
   userName = 'Admin User',
   notificationCount = 3,
 }) => {
+  const { isDark, toggleTheme, theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('dashboard');
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,14 +48,16 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'reports', label: 'Reports', icon: '📋' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'reports', label: 'Reports', icon: FileText },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <header
+      className={`sticky top-0 z-50 ${theme.bg.card}/80 backdrop-blur-md border-b ${theme.border.primary} shadow-sm`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo + Brand */}
@@ -39,25 +66,28 @@ const Header: React.FC<HeaderProps> = ({
               <span className="text-white text-xl font-bold">S</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">Sales Dashboard</h1>
-              <p className="text-xs text-gray-500">Analytics Platform</p>
+              <h1 className={`text-xl font-bold ${theme.text.primary}`}>Sales Dashboard</h1>
+              <p className={`text-xs ${theme.text.tertiary}`}>Analytics Platform</p>
             </div>
           </div>
 
           {/* Navigation Links - Hidden on mobile */}
           <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeNav === item.id ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveNav(item.id)}
-                leftIcon={<span>{item.icon}</span>}
-                className={activeNav === item.id ? 'bg-blue-50 text-blue-600' : ''}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {navItems.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <Button
+                  key={item.id}
+                  variant={activeNav === item.id ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveNav(item.id)}
+                  leftIcon={<IconComponent size={16} />}
+                  className={activeNav === item.id ? 'bg-blue-50 text-blue-600' : ''}
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
           </nav>
 
           {/* Right Section */}
@@ -69,15 +99,24 @@ const Header: React.FC<HeaderProps> = ({
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={handleSearch}
-                leftIcon={<span className="text-gray-400">🔍</span>}
-                className="w-64 bg-gray-50"
+                leftIcon={<Search size={16} className={theme.text.tertiary} />}
+                className="w-64"
               />
             </div>
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg ${theme.hover.bg} transition-colors`}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
 
             {/* Notifications */}
             <div className="relative">
               <Button variant="ghost" size="sm">
-                <span className="text-xl">🔔</span>
+                <Bell size={20} />
               </Button>
               {notificationCount > 0 && (
                 <div className="absolute -top-1 -right-1">
@@ -86,57 +125,47 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* User Menu */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                leftIcon={
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {userName.charAt(0).toUpperCase()}
-                  </div>
-                }
-                rightIcon={
-                  <span className="text-gray-400 text-xs">{isUserMenuOpen ? '▲' : '▼'}</span>
-                }
-              >
-                <span className="hidden sm:block text-sm font-medium text-gray-700">
-                  {userName}
-                </span>
-              </Button>
+            {/* ✅ User Menu - shadcn DropdownMenu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`flex items-center gap-2 p-2 rounded-lg ${theme.hover.bg} transition-colors`}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
+                    />
+                    <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className={`hidden sm:block text-sm font-medium ${theme.text.primary}`}>
+                    {userName}
+                  </span>
+                  <ChevronDown size={16} className={theme.text.tertiary} />
+                </button>
+              </DropdownMenuTrigger>
 
-              {/* Dropdown Menu */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 animate-slide-down">
-                  <a
-                    href="#profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    👤 Profile
-                  </a>
-                  <a
-                    href="#settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    ⚙️ Settings
-                  </a>
-                  <a
-                    href="#help"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    ❓ Help
-                  </a>
-                  <hr className="my-1 border-gray-200" />
-                  <a
-                    href="#logout"
-                    className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    🚪 Logout
-                  </a>
-                </div>
-              )}
-            </div>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
